@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Scalp Score Yönetim</title>
+<style>
+body{font-family:Arial;padding:30px;}
+table{width:100%;border-collapse:collapse;}
+th,td{border:1px solid #ddd;padding:10px;}
+th{background:#f5f5f5;}
+</style>
+</head>
+<body>
+
+<h1>Lead Listesi</h1>
+<button onclick="window.location.href='/download-leads'">
+Excel İçin Lead Listesini İndir
+</button>
+<br><br>
+
+<table>
+<thead>
+<tr>
+<th>Tarih</th>
+<th>Ad Soyad</th>
+<th>Telefon</th>
+<th>E-posta</th>
+<th>Score</th>
+<th>Saç Yaşı</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+
+<script>
+fetch("/admin-data")
+.then(r=>r.json())
+.then(data=>{
+const body=document.getElementById("tableBody");
+data.reverse().forEach(item=>{
+body.innerHTML += `
+<tr>
+<td>${item.tarih}</td>
+<td>${item.adSoyad}</td>
+<td>${item.telefon}</td>
+<td>${item.email || ""}</td>
+<td>${item.scalpScore}</td>
+<td>${item.hairAge}</td>
+</tr>
+`;
+});
+});
+</script>
+
+</body>
+</html>

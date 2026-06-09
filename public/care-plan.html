@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kişisel Bakım Planı</title>
+
+<style>
+body{
+font-family:Arial,sans-serif;
+background:#f5f5f5;
+margin:0;
+padding:20px;
+}
+
+.container{
+max-width:500px;
+margin:auto;
+background:white;
+padding:22px;
+border-radius:24px;
+}
+
+.card{
+background:#f7f7f7;
+padding:18px;
+margin-bottom:14px;
+border-radius:18px;
+}
+
+button{
+width:100%;
+padding:15px;
+background:black;
+color:white;
+border:none;
+border-radius:14px;
+font-size:16px;
+margin-top:12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Kişisel Bakım Planınız</h1>
+
+<div id="plan">
+Plan yükleniyor...
+</div>
+
+<button onclick="window.location.href='/'">
+Analize Geri Dön
+</button>
+
+</div>
+
+<script>
+fetch("/care-plan")
+.then(response => response.json())
+.then(plan => {
+
+  console.log("Bakım planı:", plan);
+
+  const planDiv = document.getElementById("plan");
+
+  if (plan.error) {
+    planDiv.innerHTML = `
+      <div class="card">
+        ${plan.error}<br><br>
+        Önce saç analizi yapmanız gerekiyor.
+      </div>
+    `;
+    return;
+  }
+
+  planDiv.innerHTML = `
+    <div class="card">
+      <h2>${plan.title}</h2>
+    </div>
+
+    <div class="card">
+      <h3>Hafta 1</h3>
+      <p>${plan.week1}</p>
+    </div>
+
+    <div class="card">
+      <h3>Hafta 2</h3>
+      <p>${plan.week2}</p>
+    </div>
+
+    <div class="card">
+      <h3>Hafta 3</h3>
+      <p>${plan.week3}</p>
+    </div>
+
+    <div class="card">
+      <h3>Hafta 4</h3>
+      <p>${plan.week4}</p>
+    </div>
+
+    <div class="card">
+      <h3>Önerilen Yaklaşım</h3>
+      <p>${plan.recommendation}</p>
+    </div>
+  `;
+})
+.catch(error => {
+  document.getElementById("plan").innerHTML =
+  "<div class='card'>Plan yüklenirken hata oluştu.</div>";
+
+  console.error(error);
+});
+</script>
+
+</body>
+</html>
