@@ -6,153 +6,36 @@
 <title>Saç Karnesi</title>
 
 <style>
-body{
-font-family:Arial,sans-serif;
-background:#f5f5f5;
-margin:0;
-padding:20px;
-}
-
-.container{
-max-width:500px;
-margin:auto;
-background:white;
-padding:20px;
-border-radius:24px;
-}
-
-input,select{
-width:100%;
-padding:12px;
-margin-top:8px;
-margin-bottom:15px;
-box-sizing:border-box;
-border:1px solid #ddd;
-border-radius:12px;
-}
-
-button{
-width:100%;
-padding:15px;
-background:black;
-color:white;
-border:none;
-border-radius:14px;
-font-size:16px;
-cursor:pointer;
-margin-top:15px;
-}
-
-.result{
-display:none;
-margin-top:24px;
-}
-
-.hero-score{
-background:white;
-border-radius:28px;
-padding:30px;
-text-align:center;
-box-shadow:0 20px 50px rgba(0,0,0,.08);
-margin-bottom:24px;
-}
-
-.score-ring{
-width:170px;
-height:170px;
-border-radius:50%;
-margin:20px auto 10px;
-display:flex;
-align-items:center;
-justify-content:center;
-background:conic-gradient(#111 0deg, #eee 0deg);
-}
-
-.score-inner{
-width:125px;
-height:125px;
-border-radius:50%;
-background:white;
-display:flex;
-align-items:center;
-justify-content:center;
-flex-direction:column;
-}
-
-.score-number{
-font-size:42px;
-font-weight:bold;
-}
-
-.category{
-font-size:20px;
-color:#666;
-}
-
-.age-grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:12px;
-margin-bottom:20px;
-}
-
-.card,.age-diff-card{
-background:white;
-padding:20px;
-border-radius:16px;
-box-shadow:0 5px 20px rgba(0,0,0,.05);
-text-align:center;
-}
-
-.age-diff-card{
-margin-bottom:20px;
-}
-
-.age-diff-number{
-font-size:42px;
-font-weight:bold;
-}
-
-.section{
-background:white;
-padding:22px;
-border-radius:18px;
-margin-top:16px;
-box-shadow:0 5px 20px rgba(0,0,0,.05);
-}
-
-.metric{
-margin-bottom:16px;
-}
-
-.metric-name{
-font-size:14px;
-color:#666;
-margin-bottom:4px;
-}
-
-.metric-bar{
-height:10px;
-background:#eee;
-border-radius:20px;
-overflow:hidden;
-}
-
-.metric-fill{
-height:10px;
-background:black;
-}
-.form-card{
-background:white;
-padding:30px;
-border-radius:24px;
-box-shadow:0 10px 30px rgba(0,0,0,.08);
-margin-top:20px;
-
-max-width:700px;
-margin-left:auto;
-margin-right:auto;
-}
+body{font-family:Arial,sans-serif;background:#f5f5f5;margin:0;padding:20px;color:#111;}
+.container{max-width:720px;margin:auto;}
+.hero,.form-card,.section,.card{background:white;border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,.07);}
+.hero{text-align:center;padding:32px;margin-bottom:22px;}
+.logo{height:80px;width:auto;margin-bottom:18px;}
+h1{margin:0;font-size:32px;}
+p{color:#555;line-height:1.5;}
+.hero-badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+.badge{background:#f3f3f3;padding:10px 14px;border-radius:30px;font-size:14px;}
+.form-card{padding:28px;display:none;}
+input,select{width:100%;padding:13px;margin:8px 0 15px;box-sizing:border-box;border:1px solid #ddd;border-radius:12px;font-size:15px;}
+button{width:100%;padding:15px;background:#111;color:white;border:none;border-radius:14px;font-size:16px;cursor:pointer;margin-top:12px;}
+.secondary{background:#f3f3f3;color:#111;}
+.result{display:none;margin-top:24px;}
+.hero-score{background:white;border-radius:28px;padding:30px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.08);margin-bottom:22px;}
+.score-ring{width:170px;height:170px;border-radius:50%;margin:20px auto 10px;display:flex;align-items:center;justify-content:center;background:conic-gradient(#111 0deg,#eee 0deg);}
+.score-inner{width:125px;height:125px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;flex-direction:column;}
+.score-number{font-size:42px;font-weight:bold;}
+.category{font-size:19px;color:#666;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
+.card{padding:20px;text-align:center;}
+.card h2{margin:8px 0 0;}
+.section{padding:22px;margin-top:16px;}
+.metric{margin-bottom:16px;}
+.metric-name{font-size:14px;color:#666;margin-bottom:5px;}
+.metric-bar{height:10px;background:#eee;border-radius:20px;overflow:hidden;}
+.metric-fill{height:10px;background:#111;}
+.locked{display:none;}
+#leadGate{display:none;}
+@media(max-width:600px){body{padding:14px}.grid{grid-template-columns:1fr}.hero,.form-card,.section{padding:22px}.logo{height:65px}}
 </style>
 </head>
 
@@ -160,48 +43,20 @@ margin-right:auto;
 
 <div class="container">
 
-<div style="text-align:center;margin-bottom:30px;">
-
-<img
-src="/logo.png"
-alt="Resnovae"
-style="
-height:80px;
-width:auto;
-display:block;
-margin:0 auto 20px auto;
-"
-">
-
-<h1 style="
-margin:0;
-font-size:34px;
-">
-SAÇ KARNESİ
-</h1>
-
-<p style="
-color:#666;
-margin-top:10px;
-">
-AI Destekli Saç ve Saç Derisi Analizi
-</p>
-
+<div class="hero">
+<img src="/logo.png" class="logo" alt="Resnovae">
+<h1>SAÇ KARNESİ</h1>
+<p>Saç ve saç deriniz hakkında kişisel görsel değerlendirme alın.</p>
+<div class="hero-badges">
+<span class="badge">1 Dakika</span>
+<span class="badge">3 Fotoğraf</span>
+<span class="badge">Kişisel Skor</span>
 </div>
-</p>
-
+<button id="startBtn">Analize Başla</button>
 </div>
-<div class="form-card">
 
+<div class="form-card" id="formCard">
 <form id="analysisForm">
-<label>Ad Soyad</label>
-<input type="text" name="fullName" required>
-
-<label>Telefon</label>
-<input type="tel" name="phone" required>
-
-<label>E-posta</label>
-<input type="email" name="email">
 
 <label>Yaş</label>
 <input type="number" name="age" required>
@@ -271,46 +126,45 @@ AI Destekli Saç ve Saç Derisi Analizi
 
 <div class="hero-score">
 <div style="font-size:14px;letter-spacing:2px;color:#777;">SCALP SCORE</div>
-
 <div class="score-ring" id="scoreRing">
 <div class="score-inner">
 <div class="score-number" id="score"></div>
 <div style="font-size:12px;color:#777;">/100</div>
 </div>
 </div>
-
 <div class="category" id="category"></div>
 </div>
+
 <div class="section" id="statusCard"></div>
 
-<div class="age-grid">
-
-<div class="card">
-<div>Scalp Score</div>
-<h2 id="scoreCard"></h2>
+<div class="grid">
+<div class="card"><div>Scalp Score</div><h2 id="scoreCard"></h2></div>
+<div class="card"><div>Saç Yaşı</div><h2 id="hairAge"></h2></div>
+<div class="card"><div>Yaş Farkı</div><h2 id="ageDiff"></h2></div>
+<div class="card"><div>Analiz Güveni</div><h2 id="confidence"></h2></div>
 </div>
 
-<div class="card">
-<div>Saç Yaşı</div>
-<h2 id="hairAge"></h2>
+<div id="leadGate" class="section">
+<h3>Detaylı Sonucunuz Hazır</h3>
+<p>Saç sağlığı haritanızı, PDF raporunuzu ve 30 günlük bakım planınızı görmek için iletişim bilgilerinizi bırakın.</p>
+
+<label>Ad Soyad *</label>
+<input type="text" id="leadName" required>
+
+<label>Telefon *</label>
+<input type="tel" id="leadPhone" required>
+
+<label>E-posta (İsteğe Bağlı)</label>
+<input type="email" id="leadEmail">
+
+<button id="unlockBtn">Sonucumu Göster</button>
 </div>
+
+<div id="lockedResults" class="locked">
 
 <div class="section">
-
 <h3>Öncelikli Hedefleriniz</h3>
-
 <div id="targetBadges"></div>
-
-</div>
-
-<div class="card">
-<div>Yaş Farkı</div>
-<h2 id="ageDiff"></h2>
-</div>
-
-<div class="card">
-<div>Analiz Güveni</div>
-<h2 id="confidence"></h2>
 </div>
 
 <div class="section">
@@ -331,108 +185,149 @@ AI Destekli Saç ve Saç Derisi Analizi
 
 <button onclick="window.location.href='/care-plan.html'">30 Günlük Bakım Planımı Gör</button>
 <button onclick="window.location.href='/download-pdf'">PDF Raporunu İndir</button>
-<button id="whatsappBtn">
-WhatsApp Uzman Destek
-</button>
+<button id="whatsappBtn">WhatsApp Uzman Destek</button>
+
+</div>
 
 </div>
 
 </div>
 
 <script>
-const form = document.getElementById("analysisForm");
+const startBtn=document.getElementById("startBtn");
+const formCard=document.getElementById("formCard");
+const form=document.getElementById("analysisForm");
 
-form.addEventListener("submit", async (e)=>{
+let latestResult=null;
+let latestFocusAreas=[];
+
+startBtn.onclick=()=>{
+formCard.style.display="block";
+startBtn.style.display="none";
+formCard.scrollIntoView({behavior:"smooth"});
+};
+
+form.addEventListener("submit",async(e)=>{
 e.preventDefault();
 
-const button = form.querySelector("button");
-button.innerText = "Analiz ediliyor...";
-button.disabled = true;
+const button=form.querySelector("button");
+button.innerText="Analiz ediliyor...";
+button.disabled=true;
 
-const formData = new FormData(form);
+const formData=new FormData(form);
 
 try{
-const response = await fetch("/analyze",{
-method:"POST",
-body:formData
-});
-
-const result = await response.json();
+const response=await fetch("/analyze",{method:"POST",body:formData});
+const result=await response.json();
 
 if(result.error){
 alert(result.error);
-button.innerText = "Analize Başla";
-button.disabled = false;
+button.innerText="Analize Başla";
+button.disabled=false;
 return;
 }
 
-const scoreValue = result.scalp_score ?? 0;
-const degree = scoreValue * 3.6;
+latestResult=result;
+latestFocusAreas=result.top_focus_areas || result.recommended_focus || [];
 
-let scoreColor = "#111";
-if(scoreValue < 50){
-scoreColor = "#c0392b";
-}else if(scoreValue < 70){
-scoreColor = "#d9822b";
-}else if(scoreValue < 85){
-scoreColor = "#2e7d32";
+renderPreview(result,formData);
+document.getElementById("resultBox").style.display="block";
+document.getElementById("leadGate").style.display="block";
+document.getElementById("lockedResults").style.display="none";
+document.getElementById("resultBox").scrollIntoView({behavior:"smooth"});
+
+button.innerText="Tekrar Analiz Et";
+button.disabled=false;
+
+}catch(err){
+alert("Analiz sırasında hata oluştu");
+console.error(err);
+button.innerText="Analize Başla";
+button.disabled=false;
+}
+});
+
+function renderPreview(result,formData){
+const scoreValue=result.scalp_score ?? 0;
+const degree=scoreValue*3.6;
+
+let scoreColor="#111";
+if(scoreValue<50){scoreColor="#c0392b";}
+else if(scoreValue<70){scoreColor="#d9822b";}
+else if(scoreValue<85){scoreColor="#2e7d32";}
+else{scoreColor="#14532d";}
+
+document.getElementById("score").innerText=scoreValue;
+document.getElementById("scoreCard").innerText=scoreValue;
+document.getElementById("scoreRing").style.background=
+`conic-gradient(${scoreColor} ${degree}deg,#eee ${degree}deg)`;
+
+document.getElementById("category").innerText=result.score_category ?? "";
+document.getElementById("hairAge").innerText=result.hair_age ?? "-";
+document.getElementById("confidence").innerText=(result.confidence_score ?? 80)+"%";
+
+const realAge=Number(formData.get("age"));
+const hairAge=Number(result.hair_age);
+const diff=hairAge-realAge;
+const ageDiffEl=document.getElementById("ageDiff");
+
+if(diff>0){
+ageDiffEl.innerText="+"+diff+" yıl";
+ageDiffEl.style.color="#c0392b";
+}else if(diff<0){
+ageDiffEl.innerText=diff+" yıl";
+ageDiffEl.style.color="#2e7d32";
 }else{
-scoreColor = "#14532d";
-}
-let statusText = "";
-
-if(scoreValue < 50){
-statusText =
-"Saç derinizde bakım ihtiyacına işaret eden bulgular mevcut.";
-}
-else if(scoreValue < 70){
-statusText =
-"Saç deriniz genel olarak dengeli ancak gelişime açık alanlar bulunuyor.";
-}
-else{
-statusText =
-"Saç deriniz genel olarak sağlıklı ve dengeli görünüyor.";
+ageDiffEl.innerText="0 yıl";
+ageDiffEl.style.color="#111";
 }
 
-document.getElementById("statusCard").innerHTML =
-`
-<h3>Genel Değerlendirme</h3>
-<p>${statusText}</p>
-`;
-
-document.getElementById("score").innerText = scoreValue;
-document.getElementById("scoreCard").innerText =
-scoreValue;
-document.getElementById("scoreRing").style.background =
-`conic-gradient(${scoreColor} ${degree}deg, #eee ${degree}deg)`;
-
-document.getElementById("category").innerText = result.score_category ?? "";
-document.getElementById("realAge").innerText = formData.get("age");
-document.getElementById("hairAge").innerText = result.hair_age ?? "-";
-document.getElementById("summary").innerText = result.user_friendly_summary ?? "";
-document.getElementById("confidence").innerText =
-(result.confidence_score ?? 80) + "%";
-document.getElementById("note").innerText = result.safety_note ?? "";
-
-const realAge = Number(formData.get("age"));
-const hairAge = Number(result.hair_age);
-const diff = hairAge - realAge;
-const ageDiffEl = document.getElementById("ageDiff");
-
-if(diff > 0){
-ageDiffEl.innerText = "+" + diff + " yıl";
-ageDiffEl.style.color = "#c0392b";
-}else if(diff < 0){
-ageDiffEl.innerText = diff + " yıl";
-ageDiffEl.style.color = "#2e7d32";
+let statusText="";
+if(scoreValue<50){
+statusText="Saç derinizde bakım ihtiyacına işaret eden bulgular mevcut.";
+}else if(scoreValue<70){
+statusText="Saç deriniz genel olarak dengeli ancak gelişime açık alanlar bulunuyor.";
 }else{
-ageDiffEl.innerText = "0 yıl";
-ageDiffEl.style.color = "#111";
+statusText="Saç deriniz genel olarak sağlıklı ve dengeli görünüyor.";
 }
 
-const metrics = document.getElementById("metrics");
+document.getElementById("statusCard").innerHTML=
+`<h3>Genel Değerlendirme</h3><p>${statusText}</p>`;
+}
 
-metrics.innerHTML = `
+document.getElementById("unlockBtn").onclick=async()=>{
+const fullName=document.getElementById("leadName").value.trim();
+const phone=document.getElementById("leadPhone").value.trim();
+const email=document.getElementById("leadEmail").value.trim();
+
+if(!fullName || !phone){
+alert("Lütfen ad soyad ve telefon alanlarını doldurun.");
+return;
+}
+
+await fetch("/save-lead",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+fullName,
+phone,
+email,
+scalpScore:latestResult.scalp_score,
+hairAge:latestResult.hair_age,
+focusAreas:latestFocusAreas
+})
+});
+
+renderFullResults(latestResult,latestFocusAreas);
+document.getElementById("leadGate").style.display="none";
+document.getElementById("lockedResults").style.display="block";
+};
+
+function renderFullResults(result,focusAreas){
+document.getElementById("summary").innerText=result.user_friendly_summary ?? "";
+document.getElementById("note").innerText=result.safety_note ?? "";
+
+document.getElementById("metrics").innerHTML=`
 <div class="metric"><div class="metric-name">Yoğunluk: ${result.density_score ?? "-"} / 100</div><div class="metric-bar"><div class="metric-fill" style="width:${result.density_score ?? 0}%"></div></div></div>
 <div class="metric"><div class="metric-name">Nem Dengesi: ${result.moisture_balance_score ?? "-"} / 100</div><div class="metric-bar"><div class="metric-fill" style="width:${result.moisture_balance_score ?? 0}%"></div></div></div>
 <div class="metric"><div class="metric-name">Yağ Dengesi: ${result.oil_balance_score ?? "-"} / 100</div><div class="metric-bar"><div class="metric-fill" style="width:${result.oil_balance_score ?? 0}%"></div></div></div>
@@ -441,59 +336,23 @@ metrics.innerHTML = `
 <div class="metric"><div class="metric-name">Bakım Rutini: ${result.routine_score ?? "-"} / 100</div><div class="metric-bar"><div class="metric-fill" style="width:${result.routine_score ?? 0}%"></div></div></div>
 `;
 
-const focusList = document.getElementById("focusList");
-focusList.innerHTML = "";
-
-const focusAreas = result.top_focus_areas || result.recommended_focus || [];
-
+const focusList=document.getElementById("focusList");
+focusList.innerHTML="";
 focusAreas.slice(0,3).forEach(item=>{
-const li = document.createElement("li");
-li.innerText = item;
+const li=document.createElement("li");
+li.innerText=item;
 focusList.appendChild(li);
 });
-const targetBadges =
-document.getElementById("targetBadges");
 
-if(targetBadges){
-
-targetBadges.innerHTML =
-`
-<div style="
-display:flex;
-gap:10px;
-flex-wrap:wrap;
-">
-
-<span style="
-background:#f3f3f3;
-padding:10px 14px;
-border-radius:30px;
-">
-${focusAreas[0] || ""}
-</span>
-
-<span style="
-background:#f3f3f3;
-padding:10px 14px;
-border-radius:30px;
-">
-${focusAreas[1] || ""}
-</span>
-
-<span style="
-background:#f3f3f3;
-padding:10px 14px;
-border-radius:30px;
-">
-${focusAreas[2] || ""}
-</span>
-
+document.getElementById("targetBadges").innerHTML=`
+<div style="display:flex;gap:10px;flex-wrap:wrap;">
+<span class="badge">${focusAreas[0] || ""}</span>
+<span class="badge">${focusAreas[1] || ""}</span>
+<span class="badge">${focusAreas[2] || ""}</span>
 </div>
 `;
-}
 
-document.getElementById("resultBox").style.display="block";
-const whatsappMessage = `
+const whatsappMessage=`
 Merhaba,
 
 Saç Karnesi analizimi tamamladım.
@@ -511,26 +370,11 @@ Saç Yaşı: ${result.hair_age}
 Sonucum hakkında bilgi almak istiyorum.
 `;
 
-document.getElementById("whatsappBtn").onclick = () => {
-
-const url =
-"https://wa.me/905435998684?text=" +
-encodeURIComponent(whatsappMessage);
-
-window.open(url, "_blank");
-
+document.getElementById("whatsappBtn").onclick=()=>{
+const url="https://wa.me/905435998684?text="+encodeURIComponent(whatsappMessage);
+window.open(url,"_blank");
 };
-
-button.innerText="Tekrar Analiz Et";
-button.disabled = false;
-
-}catch(err){
-alert("Analiz sırasında hata oluştu");
-console.error(err);
-button.innerText="Analize Başla";
-button.disabled = false;
 }
-});
 </script>
 
 </body>

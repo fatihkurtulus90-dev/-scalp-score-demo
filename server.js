@@ -492,7 +492,31 @@ app.get("/care-plan", (req, res) => {
   res.json(plan);
 });
 const PORT = process.env.PORT || 3000;
+app.post("/save-lead", (req, res) => {
+  const { fullName, phone, email, scalpScore, hairAge, focusAreas } = req.body;
 
+  const lead = {
+    tarih: new Date().toISOString(),
+    adSoyad: fullName,
+    telefon: phone,
+    email: email || "",
+    scalpScore,
+    hairAge,
+    focusAreas,
+  };
+
+  let leads = [];
+
+  if (fs.existsSync("leads.json")) {
+    leads = JSON.parse(fs.readFileSync("leads.json"));
+  }
+
+  leads.push(lead);
+
+  fs.writeFileSync("leads.json", JSON.stringify(leads, null, 2));
+
+  res.json({ success: true });
+});
 app.listen(PORT, () => {
   console.log(`Scalp Score çalışıyor: ${PORT}`);
 });
