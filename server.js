@@ -51,6 +51,15 @@ Sadece görünüm, eğilim, izlenim, bakım ihtiyacı, görsel belirti ve ön de
 Markdown ekleme.
 Kod bloğu ekleme.
 Sadece ham JSON döndür.
+Fotoğraf kalitesini ayrıca değerlendir.
+
+Eğer fotoğraf çok bulanık, çok karanlık, çok uzak veya ilgili bölge görünmüyorsa:
+- photo_quality alanını "poor" yap.
+- quality_warnings alanına kısa Türkçe uyarılar yaz.
+- confidence_score değerini düşük tut.
+
+Eğer fotoğraflar yeterliyse:
+- photo_quality alanını "good" yap.
 
 "Besler", "onarır", "saç çıkarır", "dökülmeyi azaltır", "tedavi eder", "iyileştirir" gibi kesin etki veya tedavi anlamı taşıyan ifadeler kullanma.
 
@@ -127,6 +136,8 @@ Aşağıdaki JSON formatında Scalp Score analizi üret:
   "sensitivity_redness_score": 0,
   "routine_score": 0,
   "confidence_score": 0,
+    "photo_quality": "good",
+  "quality_warnings": [],
 
   "top_focus_areas": [],
 
@@ -196,6 +207,94 @@ Kurallar:
         .trim();
 
       const result = JSON.parse(cleanedText);
+      result.analysis_version = "3.0";
+
+function clampScore(value, fallback = 60) {
+  const n = Number(value);
+  if (Number.isNaN(n)) return fallback;
+  return Math.max(0, Math.min(100, n));
+}
+
+function normalizeScore(value) {
+  const n = clampScore(value);
+
+  if (n >= 85) return 90;
+  if (n >= 75) return 80;
+  if (n >= 65) return 70;
+  if (n >= 55) return 60;
+  if (n >= 45) return 50;
+  if (n >= 35) return 40;
+  return 30;
+}
+
+const realAge = Number(age);
+
+const density = normalizeScore(result.density_score);
+const scalpBalance = normalizeScore(result.scalp_balance_score);
+const moisture = normalizeScore(result.moisture_balance_score);
+const oil = normalizeScore(result.oil_balance_score);
+const flakingScore = normalizeScore(result.flaking_score);
+const sensitivity = normalizeScore(result.sensitivity_redness_score);
+const routineScore = normalizeScore(result.routine_score);
+
+result.density_score = density;
+result.scalp_balance_score = scalpBalance;
+result.moisture_balance_score = moisture;
+result.oil_balance_score = oil;
+result.flaking_score = flakingScore;
+result.sensitivity_redness_score = sensitivity;
+result.routine_score = routineScore;
+
+const averageScore =
+  density * 0.30 +
+  scalpBalance * 0.10 +
+  moisture * 0.15 +
+  oil * 0.10 +
+  flakingScore * 0.10 +
+  sensitivity * 0.10 +
+  routineScore * 0.15;
+
+result.scalp_score = Math.round(averageScore);
+
+let ageAdjustment = 0;
+
+if (averageScore >= 85) {
+  ageAdjustment = -5;
+} else if (averageScore >= 75) {
+  ageAdjustment = -3;
+} else if (averageScore >= 65) {
+  ageAdjustment = 0;
+} else if (averageScore >= 55) {
+  ageAdjustment = 3;
+} else if (averageScore >= 45) {
+  ageAdjustment = 6;
+} else {
+  ageAdjustment = 10;
+}
+
+result.hair_age = Math.max(18, realAge + ageAdjustment);
+
+if (result.scalp_score < 50) {
+  result.score_category = "Yoğun Bakım İhtiyacı";
+} else if (result.scalp_score < 70) {
+  result.score_category = "Orta Düzey Bakım İhtiyacı";
+} else if (result.scalp_score < 85) {
+  result.score_category = "İyi Düzey";
+} else {
+  result.score_category = "Çok İyi Düzey";
+}
+
+if (result.photo_quality === "poor") {
+  result.confidence_score = Math.min(
+    Number(result.confidence_score || 60),
+    55
+  );
+} else {
+  result.confidence_score = Math.max(
+    Number(result.confidence_score || 75),
+    75
+  );
+}
       result.analysis_version = "2.0";
       const realAge = Number(age);
 
