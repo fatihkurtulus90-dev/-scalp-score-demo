@@ -118,10 +118,7 @@ Düzenli saç ürünü kullanımı: ${routine}
 Aşağıdaki JSON formatında Scalp Score analizi üret:
 
 {
-  "scalp_score": 0,
-  "hair_age": 0,
-  "score_category": "",
-
+ 
   "density_score": 0,
   "scalp_balance_score": 0,
   "moisture_balance_score": 0,
@@ -143,9 +140,9 @@ Aşağıdaki JSON formatında Scalp Score analizi üret:
 }
 
 Kurallar:
-- scalp_score 0-100 arasında olmalıdır.
-- hair_age kullanıcının gerçek yaşından düşük, eşit veya yüksek olabilir.
-- hair_age tıbbi yaş değil, görsel saç derisi değerlendirme yaş izlenimidir.
+
+
+
 - top_focus_areas yalnızca 3 kısa başlık içermelidir.
 - top_focus_areas örnekleri: "Saç Yoğunluğu", "Nem Dengesi", "Bakım Rutini", "Yağ Dengesi", "Pullanma", "Hassasiyet".
 - Tüm alt skorlar 0-100 arasında olmalıdır.
@@ -199,6 +196,7 @@ Kurallar:
         .trim();
 
       const result = JSON.parse(cleanedText);
+      result.analysis_version = "2.0";
       const realAge = Number(age);
 
 const density = Number(result.density_score || 60);
