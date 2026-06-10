@@ -528,14 +528,12 @@ ul{
 
       <div class="category" id="category"></div>
 
-      <div class="trust-info">
-        <div class="trust-item">✓ 3 fotoğraf analiz edildi</div>
-        <div class="trust-item">✓ 8 kriter değerlendirildi</div>
-        <div class="trust-item">✓ Yapay zekâ destekli analiz</div>
-      </div>
+      <div class="trust-info" id="trustInfo"></div>
     </div>
 
     <div class="section" id="statusCard"></div>
+
+    <div class="section" id="photoQualityCard"></div>
 
     <div class="grid">
       <div class="card">
@@ -761,6 +759,13 @@ function renderPreview(result,formData){
   document.getElementById("category").innerText=result.score_category ?? "";
   document.getElementById("hairAge").innerText=result.hair_age ?? "-";
   document.getElementById("confidence").innerText=(result.confidence_score ?? 80)+"%";
+
+  document.getElementById("trustInfo").innerHTML = `
+    <div class="trust-item">✓ 3 fotoğraf analiz edildi</div>
+    <div class="trust-item">✓ ${result.confidence_score || 75}% güven</div>
+    <div class="trust-item">✓ Yapay zekâ destekli analiz</div>
+  `;
+
   document.getElementById("premiumHairAge").innerText=result.hair_age ?? "-";
 
   const markerPosition=Math.max(5,Math.min(95,scoreValue));
@@ -803,6 +808,40 @@ function renderPreview(result,formData){
 
   document.getElementById("statusCard").innerHTML=
   `<h3>Genel Değerlendirme</h3><p>${statusText}</p>`;
+
+  const photoQuality = result.photo_quality || "good";
+  const qualityWarnings = result.quality_warnings || [];
+
+  let qualityHtml = "";
+
+  if(photoQuality === "poor"){
+    qualityHtml = `
+      <h3>📷 Fotoğraf Kalitesi</h3>
+      <p style="color:#c9852b;">
+        Bazı fotoğraflar analiz için ideal görünmüyor.
+      </p>
+      <ul>
+        ${qualityWarnings.map(item => `<li>${item}</li>`).join("")}
+      </ul>
+      <p style="font-size:13px;color:#777;">
+        Daha net sonuç için fotoğrafları gün ışığında, net ve ilgili bölgeyi gösterecek şekilde tekrar çekebilirsiniz.
+      </p>
+    `;
+  }else{
+    qualityHtml = `
+      <h3>📷 Fotoğraf Kalitesi</h3>
+      <p>
+        Fotoğraflar analiz için yeterli kalitede görünüyor.
+      </p>
+      <div class="trust-info">
+        <div class="trust-item">✓ Ön bölge net</div>
+        <div class="trust-item">✓ Tepe bölgesi net</div>
+        <div class="trust-item">✓ Yakın plan uygun</div>
+      </div>
+    `;
+  }
+
+  document.getElementById("photoQualityCard").innerHTML = qualityHtml;
 }
 
 document.getElementById("unlockBtn").onclick=async()=>{
