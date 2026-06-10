@@ -16,6 +16,7 @@
   --soft:#f1f1ee;
   --orange:#c9852b;
   --green:#6a8f68;
+  --red:#b94a48;
 }
 
 *{box-sizing:border-box;}
@@ -62,9 +63,7 @@ h1{
   letter-spacing:-.5px;
 }
 
-h2{
-  margin:0;
-}
+h2{margin:0;}
 
 h3{
   margin-top:0;
@@ -270,13 +269,8 @@ button:hover{
   background:var(--dark);
 }
 
-.locked{
-  display:none;
-}
-
-#leadGate{
-  display:none;
-}
+.locked{display:none;}
+#leadGate{display:none;}
 
 .locked-preview{
   display:grid;
@@ -298,6 +292,15 @@ button:hover{
 .locked-item span{
   color:#999;
   font-size:13px;
+}
+
+.locked-item strong{
+  font-weight:600;
+}
+
+.locked-value{
+  font-size:12px;
+  color:#999;
 }
 
 .comparison-row{
@@ -323,6 +326,66 @@ button:hover{
 
 .comparison-box strong{
   font-size:30px;
+}
+
+.age-impact{
+  background:#111;
+  color:white;
+  border-radius:28px;
+  padding:26px;
+  margin:18px 0;
+  text-align:center;
+}
+
+.age-impact small{
+  color:#aaa;
+  font-size:13px;
+  letter-spacing:1.5px;
+}
+
+.age-impact h2{
+  font-size:46px;
+  margin:8px 0;
+}
+
+.age-impact p{
+  color:#ddd;
+  margin:0;
+}
+
+.score-scale{
+  margin-top:24px;
+  background:#f4f4f1;
+  border-radius:18px;
+  padding:18px;
+}
+
+.scale-line{
+  height:10px;
+  border-radius:20px;
+  background:linear-gradient(90deg,#b94a48,#c9852b,#6a8f68);
+  position:relative;
+  margin:18px 0 8px;
+}
+
+.scale-marker{
+  width:18px;
+  height:18px;
+  background:#111;
+  border:3px solid white;
+  border-radius:50%;
+  position:absolute;
+  top:-4px;
+  left:50%;
+  transform:translateX(-50%);
+  box-shadow:0 4px 12px rgba(0,0,0,.25);
+}
+
+.scale-labels{
+  display:flex;
+  justify-content:space-between;
+  color:#777;
+  font-size:12px;
 }
 
 .privacy-note{
@@ -516,6 +579,28 @@ ul{
       </div>
     </div>
 
+    <div class="age-impact">
+      <small>SAÇ YAŞI GÖSTERGESİ</small>
+      <h2 id="premiumHairAge"></h2>
+      <p id="premiumAgeText"></p>
+    </div>
+
+    <div class="section">
+      <h3>Scalp Score Konumunuz</h3>
+      <p>Skorunuz saç derisi görünümü, yoğunluk, nem dengesi ve bakım alışkanlıkları birlikte değerlendirilerek oluşturulmuştur.</p>
+
+      <div class="score-scale">
+        <div class="scale-line">
+          <div class="scale-marker" id="scaleMarker"></div>
+        </div>
+        <div class="scale-labels">
+          <span>Zayıf</span>
+          <span>Orta</span>
+          <span>İyi</span>
+        </div>
+      </div>
+    </div>
+
     <div id="leadGate" class="section">
       <h3>🔒 Detaylı Saç Karneniz Hazır</h3>
       <p>
@@ -524,11 +609,30 @@ ul{
       </p>
 
       <div class="locked-preview">
-        <div class="locked-item">Dökülme Riski Analizi <span>Kilitli</span></div>
-        <div class="locked-item">Nem Dengesi Raporu <span>Kilitli</span></div>
-        <div class="locked-item">Saç Derisi Haritası <span>Kilitli</span></div>
-        <div class="locked-item">30 Günlük Bakım Planı <span>Kilitli</span></div>
-        <div class="locked-item">PDF Saç Karnesi <span>Kilitli</span></div>
+        <div class="locked-item">
+          <strong>Dökülme Riski Analizi</strong>
+          <span class="locked-value">Kilitli</span>
+        </div>
+
+        <div class="locked-item">
+          <strong>Yoğunluk Görünümü</strong>
+          <span class="locked-value">Kilitli</span>
+        </div>
+
+        <div class="locked-item">
+          <strong>Nem Dengesi Haritası</strong>
+          <span class="locked-value">Kilitli</span>
+        </div>
+
+        <div class="locked-item">
+          <strong>30 Günlük Bakım Planı</strong>
+          <span class="locked-value">Kilitli</span>
+        </div>
+
+        <div class="locked-item">
+          <strong>Premium PDF Raporu</strong>
+          <span class="locked-value">Kilitli</span>
+        </div>
       </div>
 
       <label>Ad Soyad *</label>
@@ -655,9 +759,12 @@ function renderPreview(result,formData){
   `conic-gradient(${scoreColor} ${degree}deg,#eee ${degree}deg)`;
 
   document.getElementById("category").innerText=result.score_category ?? "";
-
   document.getElementById("hairAge").innerText=result.hair_age ?? "-";
   document.getElementById("confidence").innerText=(result.confidence_score ?? 80)+"%";
+  document.getElementById("premiumHairAge").innerText=result.hair_age ?? "-";
+
+  const markerPosition=Math.max(5,Math.min(95,scoreValue));
+  document.getElementById("scaleMarker").style.left=markerPosition+"%";
 
   const realAge=Number(formData.get("age"));
   const hairAge=Number(result.hair_age);
@@ -673,6 +780,16 @@ function renderPreview(result,formData){
   }else{
     ageDiffEl.innerText="0 yıl";
     ageDiffEl.style.color="#111";
+  }
+
+  const premiumAgeText=document.getElementById("premiumAgeText");
+
+  if(diff>0){
+    premiumAgeText.innerText=`Gerçek yaşınızdan yaklaşık ${diff} yıl daha yüksek görünüyor.`;
+  }else if(diff<0){
+    premiumAgeText.innerText=`Gerçek yaşınızdan yaklaşık ${Math.abs(diff)} yıl daha genç görünüyor.`;
+  }else{
+    premiumAgeText.innerText="Gerçek yaşınızla uyumlu görünüyor.";
   }
 
   let statusText="";
