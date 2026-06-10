@@ -297,7 +297,9 @@ background:black;
 
 <button onclick="window.location.href='/care-plan.html'">30 Günlük Bakım Planımı Gör</button>
 <button onclick="window.location.href='/download-pdf'">PDF Raporunu İndir</button>
-<button onclick="window.open('https://wa.me/905435998684?text=Merhaba,%20Sa%C3%A7%20Karnesi%20analizimi%20ald%C4%B1m.%20Sonucum%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum.', '_blank')">WhatsApp Uzman Destek</button>
+<button id="whatsappBtn">
+WhatsApp Uzman Destek
+</button>
 
 </div>
 
@@ -417,6 +419,33 @@ focusList.appendChild(li);
 });
 
 document.getElementById("resultBox").style.display="block";
+const whatsappMessage = `
+Merhaba,
+
+Saç Karnesi analizimi tamamladım.
+
+Scalp Score: ${result.scalp_score}
+
+Saç Yaşı: ${result.hair_age}
+
+Öncelikli Alanlar:
+
+• ${(focusAreas[0] || "")}
+• ${(focusAreas[1] || "")}
+• ${(focusAreas[2] || "")}
+
+Sonucum hakkında bilgi almak istiyorum.
+`;
+
+document.getElementById("whatsappBtn").onclick = () => {
+
+const url =
+"https://wa.me/905435998684?text=" +
+encodeURIComponent(whatsappMessage);
+
+window.open(url, "_blank");
+
+};
 
 button.innerText="Tekrar Analiz Et";
 button.disabled = false;
