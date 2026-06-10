@@ -11,6 +11,7 @@ const upload = multer({ dest: "uploads/" });
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
+
 let lastAnalysisResult = null;
 let lastUserInfo = null;
 
@@ -20,6 +21,20 @@ const anthropic = new Anthropic({
 
 function imageToBase64(path) {
   return fs.readFileSync(path).toString("base64");
+}
+
+function readLeads() {
+  if (!fs.existsSync("leads.json")) return [];
+
+  try {
+    return JSON.parse(fs.readFileSync("leads.json", "utf-8"));
+  } catch {
+    return [];
+  }
+}
+
+function writeLeads(leads) {
+  fs.writeFileSync("leads.json", JSON.stringify(leads, null, 2));
 }
 
 const systemPrompt = `
@@ -72,17 +87,14 @@ app.post(
   async (req, res) => {
     try {
       const {
- fullName,
- phone,
- email,
- age,
- gender,
- washing,
- flaking,
- scalpFeeling,
- shedding,
- transplant,
- routine,
+        age,
+        gender,
+        washing,
+        flaking,
+        scalpFeeling,
+        shedding,
+        transplant,
+        routine,
       } = req.body;
 
       if (!req.files?.front || !req.files?.crown || !req.files?.closeup) {
@@ -187,39 +199,20 @@ Kurallar:
         .trim();
 
       const result = JSON.parse(cleanedText);
-lastAnalysisResult = result;
-lastUserInfo = {
-  age,
-  gender,
-  washing,
-  flaking,
-  scalpFeeling,
-  shedding,
-  transplant,
-  routine,
-};
-const lead = {
-  tarih: new Date().toISOString(),
-  adSoyad: fullName,
-  telefon: phone,
-  email: email,
-  scalpScore: result.scalp_score,
-  hairAge: result.hair_age,
-};
 
-let leads = [];
+      lastAnalysisResult = result;
+      lastUserInfo = {
+        age,
+        gender,
+        washing,
+        flaking,
+        scalpFeeling,
+        shedding,
+        transplant,
+        routine,
+      };
 
-if (fs.existsSync("leads.json")) {
-  leads = JSON.parse(fs.readFileSync("leads.json"));
-}
-
-leads.push(lead);
-
-fs.writeFileSync(
-  "leads.json",
-  JSON.stringify(leads, null, 2)
-);
-res.json(result);
+      res.json(result);
     } catch (error) {
       console.error(error);
       res.status(500).json({
@@ -228,6 +221,65 @@ res.json(result);
     }
   }
 );
+
+app.post("/save-lead", (req, res) => {
+  try {
+    const { fullName, phone, scalpScore, hairAge, focusAreas } = req.body;
+
+    if (!fullName || !phone) {
+      return res.status(400).json({
+        success: false,
+        error: "Ad soyad ve telefon zorunludur.",
+      });
+    }
+
+    let leads = readLeads();
+
+    const normalizedPhone = String(phone).replace(/\s+/g, "").trim();
+
+    const existingIndex = leads.findIndex((item) => {
+      const existingPhone = String(item.telefon || "")
+        .replace(/\s+/g, "")
+        .trim();
+
+      return existingPhone === normalizedPhone;
+    });
+
+    if (existingIndex >= 0) {
+      leads[existingIndex] = {
+        ...leads[existingIndex],
+        tarih: new Date().toISOString(),
+        adSoyad: fullName,
+        telefon: phone,
+        scalpScore,
+        hairAge,
+        focusAreas: focusAreas || [],
+        analizSayisi: (leads[existingIndex].analizSayisi || 1) + 1,
+      };
+    } else {
+      leads.push({
+        tarih: new Date().toISOString(),
+        adSoyad: fullName,
+        telefon: phone,
+        scalpScore,
+        hairAge,
+        focusAreas: focusAreas || [],
+        analizSayisi: 1,
+      });
+    }
+
+    writeLeads(leads);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      error: "Lead kaydedilirken hata oluştu.",
+    });
+  }
+});
+
 app.get("/download-pdf", (req, res) => {
   if (!lastAnalysisResult) {
     return res.status(400).send("Henüz analiz yapılmadı.");
@@ -341,36 +393,31 @@ app.get("/download-pdf", (req, res) => {
 
   doc.end();
 });
+
 app.get("/admin-data", (req, res) => {
-
-  if (!fs.existsSync("leads.json")) {
-    return res.json([]);
-  }
-
-  const leads = JSON.parse(
-    fs.readFileSync("leads.json")
-  );
-
+  const leads = readLeads();
   res.json(leads);
-
 });
+
 app.get("/download-leads", (req, res) => {
-  if (!fs.existsSync("leads.json")) {
+  const leads = readLeads();
+
+  if (!leads.length) {
     return res.status(400).send("Henüz lead yok.");
   }
 
-  const leads = JSON.parse(fs.readFileSync("leads.json"));
-
-  const header = "Tarih,Ad Soyad,Telefon,E-posta,Scalp Score,Saç Yaşı\n";
+  const header =
+    "Tarih,Ad Soyad,Telefon,Scalp Score,Saç Yaşı,Analiz Sayısı,Odak Alanları\n";
 
   const rows = leads.map((item) => {
     return [
       item.tarih,
       item.adSoyad,
       item.telefon,
-      item.email || "",
       item.scalpScore,
       item.hairAge,
+      item.analizSayisi || 1,
+      (item.focusAreas || []).join(" | "),
     ].join(",");
   });
 
@@ -381,78 +428,11 @@ app.get("/download-leads", (req, res) => {
 
   res.send("\uFEFF" + csv);
 });
-app.get("/care-plan", (req, res) => {
 
-  if (!lastAnalysisResult) {
-    return res.json({
-      error: "Henüz analiz yapılmadı"
-    });
-  }
-
-  const score = lastAnalysisResult.scalp_score;
-
-  let plan;
-
-  if(score < 50){
-
-    plan = {
-      title:"Yoğun Destek Planı",
-
-      week1:"Saç derisi temizliğini düzenleyin ve haftalık fotoğraf takibi başlatın.",
-
-      week2:"Nem dengesi ve saç derisi konforuna odaklanın.",
-
-      week3:"Yoğunluk görünümünü destekleyecek bakım rutini oluşturun.",
-
-      week4:"Yeniden analiz yaparak değişimi ölçün.",
-
-      recommendation:
-      "Resnovae Scalp MD bakım sürecinin bir parçası olarak değerlendirilebilir."
-    };
-
-  } else if(score < 70){
-
-    plan = {
-      title:"Gelişim Planı",
-
-      week1:"Yıkama ve bakım düzeninizi standardize edin.",
-
-      week2:"Saç derisinin nem ve konfor durumunu takip edin.",
-
-      week3:"Düzenli bakım alışkanlığı oluşturun.",
-
-      week4:"Yeni Scalp Score ölçümü yapın.",
-
-      recommendation:
-      "Resnovae Scalp MD düzenli bakım yaklaşımına destek sağlayabilir."
-    };
-
-  } else {
-
-    plan = {
-      title:"Koruma Planı",
-
-      week1:"Mevcut rutini koruyun.",
-
-      week2:"Haftalık fotoğraf takibi yapın.",
-
-      week3:"Saç derisi dengesini sürdürmeye odaklanın.",
-
-      week4:"Yeni analiz ile değişimi kontrol edin.",
-
-      recommendation:
-      "Mevcut dengeyi korumaya yönelik bakım yaklaşımı sürdürülebilir."
-    };
-
-  }
-
-  res.json(plan);
-
-});
 app.get("/care-plan", (req, res) => {
   if (!lastAnalysisResult) {
     return res.json({
-      error: "Henüz analiz yapılmadı"
+      error: "Henüz analiz yapılmadı",
     });
   }
 
@@ -463,11 +443,13 @@ app.get("/care-plan", (req, res) => {
   if (score < 50) {
     plan = {
       title: "Yoğun Destek Planı",
-      week1: "Saç derisi temizliğini düzenleyin ve haftalık fotoğraf takibi başlatın.",
+      week1:
+        "Saç derisi temizliğini düzenleyin ve haftalık fotoğraf takibi başlatın.",
       week2: "Nem dengesi ve saç derisi konforuna odaklanın.",
       week3: "Yoğunluk görünümünü destekleyecek bakım rutini oluşturun.",
       week4: "Yeniden analiz yaparak değişimi ölçün.",
-      recommendation: "Resnovae Scalp MD bakım sürecinin bir parçası olarak değerlendirilebilir."
+      recommendation:
+        "Resnovae Scalp MD bakım sürecinin bir parçası olarak değerlendirilebilir.",
     };
   } else if (score < 70) {
     plan = {
@@ -476,7 +458,8 @@ app.get("/care-plan", (req, res) => {
       week2: "Saç derisinin nem ve konfor durumunu takip edin.",
       week3: "Düzenli bakım alışkanlığı oluşturun.",
       week4: "Yeni Scalp Score ölçümü yapın.",
-      recommendation: "Resnovae Scalp MD düzenli bakım yaklaşımına destek sağlayabilir."
+      recommendation:
+        "Resnovae Scalp MD düzenli bakım yaklaşımına destek sağlayabilir.",
     };
   } else {
     plan = {
@@ -485,38 +468,16 @@ app.get("/care-plan", (req, res) => {
       week2: "Haftalık fotoğraf takibi yapın.",
       week3: "Saç derisi dengesini sürdürmeye odaklanın.",
       week4: "Yeni analiz ile değişimi kontrol edin.",
-      recommendation: "Mevcut dengeyi korumaya yönelik bakım yaklaşımı sürdürülebilir."
+      recommendation:
+        "Mevcut dengeyi korumaya yönelik bakım yaklaşımı sürdürülebilir.",
     };
   }
 
   res.json(plan);
 });
+
 const PORT = process.env.PORT || 3000;
-app.post("/save-lead", (req, res) => {
-  const { fullName, phone, email, scalpScore, hairAge, focusAreas } = req.body;
 
-  const lead = {
-    tarih: new Date().toISOString(),
-    adSoyad: fullName,
-    telefon: phone,
-    email: email || "",
-    scalpScore,
-    hairAge,
-    focusAreas,
-  };
-
-  let leads = [];
-
-  if (fs.existsSync("leads.json")) {
-    leads = JSON.parse(fs.readFileSync("leads.json"));
-  }
-
-  leads.push(lead);
-
-  fs.writeFileSync("leads.json", JSON.stringify(leads, null, 2));
-
-  res.json({ success: true });
-});
 app.listen(PORT, () => {
   console.log(`Scalp Score çalışıyor: ${PORT}`);
 });
