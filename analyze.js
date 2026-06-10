@@ -171,14 +171,11 @@ if (averageScore >= 85) {
   ageAdjustment = -3;
 } else if (averageScore >= 65) {
   ageAdjustment = 0;
-} else if (averageScore >= 55) {
-  ageAdjustment = 3;
-} else if (averageScore >= 45) {
-  ageAdjustment = 6;
+} else if (averageScore >= 50) {
+  ageAdjustment = 4;
 } else {
-  ageAdjustment = 10;
+  ageAdjustment = 8;
 }
-
 result.hair_age = Math.max(18, realAge + ageAdjustment);
 result.scalp_score = Math.round(averageScore);
 
