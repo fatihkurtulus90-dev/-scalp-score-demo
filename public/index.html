@@ -49,12 +49,12 @@ margin-top:24px;
 }
 
 .hero-score{
-background:#fff;
-border-radius:24px;
+background:white;
+border-radius:28px;
 padding:30px;
 text-align:center;
-box-shadow:0 10px 30px rgba(0,0,0,.08);
-margin-bottom:20px;
+box-shadow:0 20px 50px rgba(0,0,0,.08);
+margin-bottom:24px;
 }
 
 .score-ring{
@@ -114,10 +114,11 @@ font-weight:bold;
 }
 
 .section{
-background:#f7f7f7;
-padding:18px;
+background:white;
+padding:22px;
 border-radius:18px;
 margin-top:16px;
+box-shadow:0 5px 20px rgba(0,0,0,.05);
 }
 
 .metric{
@@ -148,8 +149,34 @@ background:black;
 
 <div class="container">
 
-<h1>Saç Karnesi</h1>
-<p>Saç derinizin görünümünü ve bakım ihtiyaçlarını analiz edin.</p>
+<div style="text-align:center;margin-bottom:30px;">
+
+<img
+src="/logo.png"
+alt="Resnovae"
+style="
+height:70px;
+margin-bottom:15px;
+">
+
+<h1 style="
+margin:0;
+font-size:34px;
+">
+SAÇ KARNESİ
+</h1>
+
+<p style="
+color:#666;
+margin-top:10px;
+">
+AI Destekli Saç ve Saç Derisi Analizi
+</p>
+
+</div>
+</p>
+
+</div>
 
 <form id="analysisForm">
 <label>Ad Soyad</label>
@@ -252,6 +279,14 @@ background:black;
 <h2 id="hairAge"></h2>
 </div>
 
+<div class="section">
+
+<h3>Öncelikli Hedefleriniz</h3>
+
+<div id="targetBadges"></div>
+
+</div>
+
 <div class="card">
 <div>Yaş Farkı</div>
 <h2 id="ageDiff"></h2>
@@ -260,23 +295,6 @@ background:black;
 <div class="card">
 <div>Analiz Güveni</div>
 <h2 id="confidence"></h2>
-</div>
-
-</div>
-<div class="card">
-<div>Gerçek Yaş</div>
-<h2 id="realAge"></h2>
-</div>
-
-<div class="card">
-<div>Saç Yaşı</div>
-<h2 id="hairAge"></h2>
-</div>
-</div>
-
-<div class="age-diff-card">
-<div>Saç Yaşı Farkı</div>
-<div class="age-diff-number" id="ageDiff"></div>
 </div>
 
 <div class="section">
@@ -417,6 +435,46 @@ const li = document.createElement("li");
 li.innerText = item;
 focusList.appendChild(li);
 });
+const targetBadges =
+document.getElementById("targetBadges");
+
+if(targetBadges){
+
+targetBadges.innerHTML =
+`
+<div style="
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+">
+
+<span style="
+background:#f3f3f3;
+padding:10px 14px;
+border-radius:30px;
+">
+${focusAreas[0] || ""}
+</span>
+
+<span style="
+background:#f3f3f3;
+padding:10px 14px;
+border-radius:30px;
+">
+${focusAreas[1] || ""}
+</span>
+
+<span style="
+background:#f3f3f3;
+padding:10px 14px;
+border-radius:30px;
+">
+${focusAreas[2] || ""}
+</span>
+
+</div>
+`;
+}
 
 document.getElementById("resultBox").style.display="block";
 const whatsappMessage = `
