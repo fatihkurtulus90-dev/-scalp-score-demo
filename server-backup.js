@@ -286,7 +286,7 @@ app.get("/download-pdf", (req, res) => {
   }
 
   const result = lastAnalysisResult;
-  const user = lastUserInfo || {};
+  const user = lastUserInfo;
 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
@@ -294,386 +294,102 @@ app.get("/download-pdf", (req, res) => {
     "attachment; filename=sac-karnesi-raporu.pdf"
   );
 
-  const doc = new PDFDocument({ size: "A4", margin: 48 });
+  const doc = new PDFDocument({ margin: 50 });
   doc.pipe(res);
 
-  const regularFont = "fonts/NotoSans-Regular.ttf";
-  const boldFont = "fonts/NotoSans-Bold.ttf";
+  doc.fontSize(26).text("Saç Karnesi", { align: "center" });
+  doc.moveDown();
 
-  if (fs.existsSync(regularFont) && fs.existsSync(boldFont)) {
-    doc.registerFont("Regular", regularFont);
-    doc.registerFont("Bold", boldFont);
-    doc.font("Regular");
-  }
-
-  const pageWidth = doc.page.width;
-  const pageHeight = doc.page.height;
-
-  const colors = {
-    text: "#111111",
-    muted: "#6B6B6B",
-    light: "#F4F4F1",
-    border: "#E5E5E0",
-    dark: "#1C1C1E",
-    orange: "#C9852B",
-    green: "#6A8F68",
-    red: "#B94A48",
-  };
-
-  function write(value, x, y, options = {}) {
-    doc
-      .fillColor(options.color || colors.text)
-      .font(options.bold ? "Bold" : "Regular")
-      .fontSize(options.size || 12)
-      .text(value, x, y, options);
-  }
-
-  function title(value, y) {
-    write(value, 48, y, {
-      size: 22,
-      bold: true,
-      width: pageWidth - 96,
-    });
-  }
-
-  function subtitle(value, y) {
-    write(value, 48, y, {
-      size: 11,
-      color: colors.muted,
-      width: pageWidth - 96,
-      lineGap: 4,
-    });
-  }
-
-  function card(x, y, w, h) {
-    doc.roundedRect(x, y, w, h, 18).fillAndStroke("#FFFFFF", colors.border);
-  }
-
-  function metricBar(label, value, y) {
-    const safeValue = Number(value || 0);
-    const barX = 48;
-    const barY = y + 24;
-    const barW = pageWidth - 96;
-    const barH = 9;
-
-    write(`${label}: ${safeValue} / 100`, 48, y, {
-      size: 11,
-      color: colors.text,
-    });
-
-    doc.roundedRect(barX, barY, barW, barH, 5).fill(colors.light);
-    doc.roundedRect(barX, barY, (barW * safeValue) / 100, barH, 5).fill(colors.dark);
-  }
-
-  function scoreColor(score) {
-    if (score < 50) return colors.red;
-    if (score < 70) return colors.orange;
-    return colors.green;
-  }
-
-  const score = Number(result.scalp_score || 0);
-  const realAge = Number(user.age || 0);
-  const hairAge = Number(result.hair_age || 0);
-  const ageDiff = hairAge && realAge ? hairAge - realAge : 0;
-  const confidence = result.confidence_score || 80;
-  const focusAreas = result.top_focus_areas || result.recommended_focus || [];
-
-  // SAYFA 1 — KAPAK
-  doc.rect(0, 0, pageWidth, pageHeight).fill("#FFFFFF");
-
-  write("RESNOVAE", 48, 54, {
-    size: 13,
-    bold: true,
-    characterSpacing: 2,
-  });
-
-  write("SAÇ KARNENİZ HAZIR", 48, 138, {
-    size: 28,
-    bold: true,
-    width: pageWidth - 96,
-  });
-
-  subtitle("Kişisel saç ve saç derisi görsel değerlendirme raporu", 178);
-
-  doc.circle(pageWidth / 2, 330, 92).lineWidth(16).strokeColor(colors.light).stroke();
-  doc.circle(pageWidth / 2, 330, 92).lineWidth(16).strokeColor(scoreColor(score)).stroke();
-
-  write(`${score}`, pageWidth / 2 - 55, 292, {
-    size: 52,
-    bold: true,
-    width: 110,
+  doc.fontSize(14).text("Kişisel Saç Derisi Denge Raporu", {
     align: "center",
   });
 
-  write("/100", pageWidth / 2 - 30, 352, {
-    size: 14,
-    color: colors.muted,
-    width: 60,
+  doc.moveDown(2);
+
+  doc.fontSize(36).text(`${result.scalp_score} / 100`, {
     align: "center",
   });
 
-  write(result.score_category || "Kişisel Değerlendirme", 48, 460, {
-    size: 18,
-    bold: true,
-    width: pageWidth - 96,
+  doc.fontSize(16).text(result.score_category || "", {
     align: "center",
   });
 
-  subtitle(
-    "Bu rapor, yüklenen fotoğraflar ve bakım alışkanlıklarına göre hazırlanmış bilgilendirme amaçlı bir ön değerlendirmedir. Tıbbi tanı yerine geçmez.",
-    500
-  );
+  doc.moveDown();
 
-  write("Yapay zekâ destekli görüntü analizi", 48, 720, {
-    size: 10,
-    color: colors.muted,
-    width: pageWidth - 96,
-    align: "center",
+  doc.fontSize(14).text(`Gerçek Yaş: ${user.age}`, { align: "center" });
+  doc.fontSize(14).text(`Saç Yaşı: ${result.hair_age}`, { align: "center" });
+
+  doc.moveDown(2);
+
+  doc.fontSize(18).text("Saç Sağlığı Haritası");
+  doc.moveDown();
+
+  doc.fontSize(12).text(`Yoğunluk Görünümü: ${result.density_score} / 100`);
+  doc.text(`Saç Derisi Dengesi: ${result.scalp_balance_score} / 100`);
+  doc.text(`Nem Dengesi: ${result.moisture_balance_score} / 100`);
+  doc.text(`Yağ Dengesi: ${result.oil_balance_score} / 100`);
+  doc.text(`Pullanma / Kepek: ${result.flaking_score} / 100`);
+  doc.text(`Hassasiyet / Kızarıklık: ${result.sensitivity_redness_score} / 100`);
+  doc.text(`Bakım Rutini: ${result.routine_score} / 100`);
+
+  doc.moveDown(2);
+
+  doc.fontSize(18).text("Öncelikli Odak Alanları");
+  doc.moveDown();
+
+  (result.top_focus_areas || []).forEach((item, index) => {
+    doc.fontSize(12).text(`${index + 1}. ${item}`);
   });
 
-  // SAYFA 2 — GENEL ÖZET
   doc.addPage();
 
-  title("Genel Sonuç Özeti", 54);
-  subtitle(
-    "Saç derinizin genel görünümü, yaş bilgisi ve bakım alışkanlıkları birlikte değerlendirilmiştir.",
-    88
+  doc.fontSize(20).text("Kişisel Değerlendirme");
+  doc.moveDown();
+  doc.fontSize(12).text(result.user_friendly_summary || "");
+
+  doc.moveDown(2);
+
+  doc.fontSize(20).text("30 Günlük Saç Derisi Denge Planı");
+  doc.moveDown();
+
+  doc.fontSize(13).text("Hafta 1: Temizleme düzenini dengeleme");
+  doc.fontSize(11).text(
+    "Saç derisinin verdiği kuruluk, yağlanma veya hassasiyet sinyallerini takip edin."
   );
 
-  const boxW = (pageWidth - 112) / 2;
+  doc.moveDown();
 
-  card(48, 140, boxW, 110);
-  write("Scalp Score", 68, 162, { size: 11, color: colors.muted });
-  write(`${score}/100`, 68, 190, { size: 28, bold: true });
-
-  card(64 + boxW, 140, boxW, 110);
-  write("Saç Yaşı", 84 + boxW, 162, { size: 11, color: colors.muted });
-  write(`${hairAge || "-"}`, 84 + boxW, 190, { size: 28, bold: true });
-
-  card(48, 270, boxW, 110);
-  write("Yaş Farkı", 68, 292, { size: 11, color: colors.muted });
-  write(ageDiff > 0 ? `+${ageDiff} yıl` : `${ageDiff} yıl`, 68, 320, {
-    size: 28,
-    bold: true,
-    color: ageDiff > 0 ? colors.orange : colors.green,
-  });
-
-  card(64 + boxW, 270, boxW, 110);
-  write("Analiz Güveni", 84 + boxW, 292, { size: 11, color: colors.muted });
-  write(`${confidence}%`, 84 + boxW, 320, { size: 28, bold: true });
-
-  title("Kısa Değerlendirme", 430);
-
-  write(result.user_friendly_summary || "Kişisel değerlendirme oluşturuldu.", 48, 468, {
-    size: 12,
-    color: colors.muted,
-    width: pageWidth - 96,
-    lineGap: 5,
-  });
-
-  // SAYFA 3 — SAÇ SAĞLIĞI HARİTASI
-  doc.addPage();
-
-  title("Saç Sağlığı Haritası", 54);
-  subtitle(
-    "Aşağıdaki skorlar, saç ve saç derisinin görsel değerlendirmesine göre hazırlanmıştır.",
-    88
+  doc.fontSize(13).text("Hafta 2: Nem ve konfor desteği");
+  doc.fontSize(11).text(
+    "Saç derisi bakım rutininize düzenli ve hafif yapılı destekleyici ürünler ekleyin."
   );
 
-  let y = 145;
+  doc.moveDown();
 
-  metricBar("Yoğunluk Görünümü", result.density_score, y);
-  y += 58;
-  metricBar("Saç Derisi Dengesi", result.scalp_balance_score, y);
-  y += 58;
-  metricBar("Nem Dengesi", result.moisture_balance_score, y);
-  y += 58;
-  metricBar("Yağ Dengesi", result.oil_balance_score, y);
-  y += 58;
-  metricBar("Pullanma / Kepek Görünümü", result.flaking_score, y);
-  y += 58;
-  metricBar("Hassasiyet / Kızarıklık Görünümü", result.sensitivity_redness_score, y);
-  y += 58;
-  metricBar("Bakım Rutini", result.routine_score, y);
-
-  // SAYFA 4 — GÜÇLÜ YÖNLER VE ODAK ALANLARI
-  doc.addPage();
-
-  title("Güçlü Yönler ve Gelişim Alanları", 54);
-  subtitle(
-    "Bu bölüm, saç derinizin olumlu görünen alanlarını ve geliştirilmesi önerilen öncelikli başlıkları gösterir.",
-    88
+  doc.fontSize(13).text("Hafta 3: Yoğunluk görünümü takibi");
+  doc.fontSize(11).text(
+    "Aynı ışık ve açıyla haftalık fotoğraf çekerek değişimi takip edin."
   );
 
-  card(48, 140, pageWidth - 96, 170);
-  write("Güçlü Görünen Alanlar", 68, 166, {
-    size: 16,
-    bold: true,
-  });
+  doc.moveDown();
 
-  const strongPoints = result.strong_points?.length
-    ? result.strong_points
-    : [
-        "Pullanma ve kepek görünümünün düşük olması olumlu bir göstergedir.",
-        "Hassasiyet veya kızarıklık görünümü belirgin değilse saç derisi konforu açısından olumlu kabul edilebilir.",
-        "Yağ dengesi görünümü genel bakım rutini açısından takip edilebilir düzeydedir.",
-      ];
-
-  let sy = 202;
-
-  strongPoints.slice(0, 3).forEach((item) => {
-    write(`✓ ${item}`, 68, sy, {
-      size: 11,
-      color: colors.muted,
-      width: pageWidth - 136,
-      lineGap: 3,
-    });
-    sy += 38;
-  });
-
-  card(48, 350, pageWidth - 96, 220);
-  write("Öncelikli Odak Alanları", 68, 376, {
-    size: 16,
-    bold: true,
-  });
-
-  let fy = 414;
-
-  focusAreas.slice(0, 3).forEach((item, index) => {
-    write(`${index + 1}. ${item}`, 68, fy, {
-      size: 13,
-      bold: true,
-    });
-
-    write(
-      "Bu başlık, bakım rutininizde önceliklendirilmesi önerilen alanlardan biridir.",
-      68,
-      fy + 22,
-      {
-        size: 10,
-        color: colors.muted,
-        width: pageWidth - 136,
-      }
-    );
-
-    fy += 58;
-  });
-
-  // SAYFA 5 — 30 GÜNLÜK PLAN
-  doc.addPage();
-
-  title("30 Günlük Saç Derisi Denge Planı", 54);
-  subtitle(
-    "Bu plan, saç derisi konforu ve düzenli bakım alışkanlığını desteklemek amacıyla hazırlanmıştır.",
-    88
+  doc.fontSize(13).text("Hafta 4: Yeniden değerlendirme");
+  doc.fontSize(11).text(
+    "30 gün sonunda yeniden analiz yaparak Scalp Score değişiminizi görün."
   );
 
-  const weeks = [
-    {
-      title: "Hafta 1",
-      goal: "Temizleme düzenini dengeleme",
-      desc: "Saç derisinin verdiği kuruluk, yağlanma veya hassasiyet sinyallerini takip edin.",
-    },
-    {
-      title: "Hafta 2",
-      goal: "Nem ve konfor desteği",
-      desc: "Saç derisi bakım rutininize düzenli ve hafif yapılı destekleyici ürünler ekleyin.",
-    },
-    {
-      title: "Hafta 3",
-      goal: "Yoğunluk görünümü takibi",
-      desc: "Aynı ışık ve açıyla haftalık fotoğraf çekerek değişimi takip edin.",
-    },
-    {
-      title: "Hafta 4",
-      goal: "Yeniden değerlendirme",
-      desc: "30 gün sonunda yeniden analiz yaparak Scalp Score değişiminizi görün.",
-    },
-  ];
+  doc.moveDown(2);
 
-  y = 145;
+  doc.fontSize(20).text("Önerilen Bakım Yaklaşımı");
+  doc.moveDown();
 
-  weeks.forEach((week) => {
-    card(48, y, pageWidth - 96, 105);
-
-    write(week.title, 68, y + 22, {
-      size: 13,
-      bold: true,
-    });
-
-    write(week.goal, 150, y + 22, {
-      size: 13,
-      bold: true,
-    });
-
-    write(week.desc, 150, y + 48, {
-      size: 10.5,
-      color: colors.muted,
-      width: pageWidth - 220,
-      lineGap: 3,
-    });
-
-    y += 125;
-  });
-
-  // SAYFA 6 — RESNOVAE BÖLÜMÜ
-  doc.addPage();
-
-  title("Bakım Yaklaşımı", 54);
-  subtitle(
-    "Saç derisi bakımında temel hedef; konfor, nem dengesi ve düzenli bakım alışkanlığının desteklenmesidir.",
-    88
+  doc.fontSize(12).text(
+    "Saç derisi konforu, nem dengesi ve düzenli bakım rutininin desteklenmesi için Resnovae Scalp MD bakım sürecinin bir parçası olarak değerlendirilebilir."
   );
 
-  card(48, 150, pageWidth - 96, 250);
+  doc.moveDown();
 
-  write("Resnovae Scalp MD", 68, 180, {
-    size: 18,
-    bold: true,
-  });
-
-  write(
-    "Saç derisinin konforu, nem dengesi ve bakım rutininin desteklenmesi amacıyla geliştirilen biyoteknolojik bakım yaklaşımıdır.",
-    68,
-    220,
-    {
-      size: 12,
-      color: colors.muted,
-      width: pageWidth - 136,
-      lineGap: 5,
-    }
-  );
-
-  write(
-    "Bu raporda yer alan öneriler tıbbi tedavi önerisi değildir. Saç dökülmesi, kızarıklık, kaşıntı, hassasiyet veya benzeri durumlarda dermatoloji uzmanına danışılması önerilir.",
-    68,
-    310,
-    {
-      size: 10.5,
-      color: colors.muted,
-      width: pageWidth - 136,
-      lineGap: 4,
-    }
-  );
-
-  write("Rapor Notu", 48, 470, {
-    size: 14,
-    bold: true,
-  });
-
-  write(result.safety_note || "Bu analiz tıbbi tanı değildir.", 48, 500, {
-    size: 10,
-    color: colors.muted,
-    width: pageWidth - 96,
-    lineGap: 4,
-  });
-
-  write("Resnovae Saç Karnesi", 48, 735, {
-    size: 10,
-    color: colors.muted,
-    width: pageWidth - 96,
-    align: "center",
-  });
+  doc.fontSize(10).fillColor("gray").text(result.safety_note || "");
 
   doc.end();
 });
