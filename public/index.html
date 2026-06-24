@@ -731,6 +731,30 @@ form.addEventListener("submit",async(e)=>{
     const response=await fetch("/analyze",{method:"POST",body:formData});
     const result=await response.json();
 
+    if(result.validity_gate){
+      alert(
+        "Yüklenen görseller saç analizi için uygun görünmüyor.\n\n" +
+        (result.validity_warnings || ["Görseller saç veya saç derisi içermiyor."]).join("\n")
+      );
+
+      button.innerText="Analize Başla";
+      button.disabled=false;
+
+      return;
+    }
+
+    if(result.quality_gate){
+      alert(
+        "Fotoğraflar analiz için yeterli kalitede görünmüyor.\n\n" +
+        (result.quality_warnings || ["Fotoğraflar analiz için yeterli kalitede değil."]).join("\n")
+      );
+
+      button.innerText="Analize Başla";
+      button.disabled=false;
+
+      return;
+    }
+
     if(result.error){
       alert(result.error);
       button.innerText="Analize Başla";
