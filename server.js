@@ -84,6 +84,30 @@ Bakım Rutini
 Yağ Dengesi
 Pullanma
 Hassasiyet
+Fotoğraf geçerliliğini ayrıca değerlendir.
+
+Eğer fotoğrafta insan saçı veya saç derisi yoksa:
+- photo_validity alanını "invalid" yap.
+- validity_warnings alanına kısa Türkçe uyarı yaz.
+- Bu görsel saç analizi için uygun değildir.
+
+Geçersiz görseller:
+- nöron, hücre, mikroskop, illüstrasyon veya animasyon görselleri
+- ürün fotoğrafı
+- manzara, obje veya alakasız görseller
+- saç ya da saç derisi içermeyen herhangi bir görsel
+
+Eğer fotoğrafta insan saçı veya saç derisi görünüyorsa:
+- photo_validity alanını "valid" yap.
+- validity_warnings boş dizi olsun.
+- visible_scaling yalnızca fotoğrafta gerçek pullanma/kepek görünüyorsa true olmalıdır.
+- Saç derisi kuru görünüyor diye otomatik olarak visible_scaling true yapma.
+- visible_redness yalnızca gerçek kızarıklık görünüyorsa true olmalıdır.
+- visible_oiliness yalnızca parlak/yağlı görünüm belirginse true olmalıdır.
+- visible_thinning yalnızca saç yoğunluğunda belirgin azalma varsa true olmalıdır.
+- visible_inflammation yalnızca belirgin tahriş/kızarıklık görünümü varsa true olmalıdır.
+- Kullanıcı “kepek yok” dediyse ve fotoğrafta pullanma net görünmüyorsa flaking/pullanma problemi varsayma.
+- Tahmin değil, yalnızca görünen bulguları işaretle.
 `;
 
 app.post(
@@ -138,6 +162,15 @@ Aşağıdaki JSON formatında Scalp Score analizi üret:
   "confidence_score": 0,
     "photo_quality": "good",
   "quality_warnings": [],
+  "visible_scaling": false,
+"visible_redness": false,
+"visible_oiliness": false,
+"visible_thinning": false,
+"visible_hair_breakage": false,
+"visible_follicular_spacing": false,
+"visible_inflammation": false,
+  "photo_validity": "valid",
+"validity_warnings": [],
 
   "top_focus_areas": [],
 
@@ -229,12 +262,46 @@ function normalizeScore(value) {
 
 const realAge = Number(age);
 
-const density = normalizeScore(result.density_score);
+let density;
+
+if (result.visible_thinning === true && result.visible_follicular_spacing === true) {
+  density = 45;
+} else if (result.visible_thinning === true) {
+  density = 55;
+} else {
+  density = 80;
+}
 const scalpBalance = normalizeScore(result.scalp_balance_score);
 const moisture = normalizeScore(result.moisture_balance_score);
-const oil = normalizeScore(result.oil_balance_score);
-const flakingScore = normalizeScore(result.flaking_score);
-const sensitivity = normalizeScore(result.sensitivity_redness_score);
+let oil;
+
+if (result.visible_oiliness === true) {
+  oil = 50;
+} else {
+  oil = 80;
+}
+let flakingScore;
+
+const userReportsFlaking =
+  String(flaking || "").toLowerCase().includes("sık") ||
+  String(flaking || "").toLowerCase().includes("ara");
+
+if (result.visible_scaling === true && userReportsFlaking) {
+  flakingScore = 40;
+} else if (result.visible_scaling === true && !userReportsFlaking) {
+  flakingScore = 55;
+} else if (result.visible_scaling !== true && userReportsFlaking) {
+  flakingScore = 70;
+} else {
+  flakingScore = 90;
+}
+let sensitivity;
+
+if (result.visible_redness === true || result.visible_inflammation === true) {
+  sensitivity = 45;
+} else {
+  sensitivity = 85;
+}
 const routineScore = normalizeScore(result.routine_score);
 
 result.density_score = density;
@@ -294,6 +361,13 @@ if (result.photo_quality === "poor") {
     Number(result.confidence_score || 75),
     75
   );
+}if (result.photo_validity === "invalid") {
+  return res.json({
+    validity_gate: true,
+    validity_warnings: result.validity_warnings || [
+      "Yüklenen görseller saç analizi için uygun görünmüyor."
+    ]
+  });
 }
 if (result.photo_quality === "poor") {
   return res.json({
