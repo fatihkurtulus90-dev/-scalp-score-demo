@@ -295,6 +295,14 @@ if (result.photo_quality === "poor") {
     75
   );
 }
+if (result.photo_quality === "poor") {
+  return res.json({
+    quality_gate: true,
+    quality_warnings: result.quality_warnings || [
+      "Fotoğraflar analiz için yeterli kalitede görünmüyor."
+    ]
+  });
+}
    
       lastAnalysisResult = result;
       lastUserInfo = {
