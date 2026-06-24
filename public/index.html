@@ -674,7 +674,10 @@ ul{
         <h3>Öncelikli Hedefleriniz</h3>
         <div id="targetBadges"></div>
       </div>
-
+      <div class="section">
+  <h3>Risk Haritası</h3>
+  <div id="riskMap"></div>
+</div>
       <div class="section">
         <h3>Saç Sağlığı Haritası</h3>
         <div id="metrics"></div>
@@ -901,7 +904,42 @@ document.getElementById("unlockBtn").onclick=async()=>{
 function renderFullResults(result,focusAreas){
   document.getElementById("summary").innerText=result.user_friendly_summary ?? "";
   document.getElementById("note").innerText=result.safety_note ?? "";
+  const riskItems = [
+  { label:"Yoğunluk", value: result.density_score },
+  { label:"Saç Derisi Dengesi", value: result.scalp_balance_score },
+  { label:"Nem Dengesi", value: result.moisture_balance_score },
+  { label:"Yağ Dengesi", value: result.oil_balance_score },
+  { label:"Pullanma", value: result.flaking_score },
+  { label:"Hassasiyet", value: result.sensitivity_redness_score },
+  { label:"Bakım Rutini", value: result.routine_score }
+];
 
+const sortedRisks = riskItems
+  .filter(item => item.value !== undefined && item.value !== null)
+  .sort((a,b) => a.value - b.value);
+
+const highRisk = sortedRisks[0];
+const mediumRisk = sortedRisks[1];
+const strongArea = sortedRisks[sortedRisks.length - 1];
+
+document.getElementById("riskMap").innerHTML = `
+  <div class="locked-preview">
+    <div class="locked-item">
+      <strong>🔴 Öncelikli Alan</strong>
+      <span class="locked-value">${highRisk.label} (${highRisk.value}/100)</span>
+    </div>
+
+    <div class="locked-item">
+      <strong>🟠 Takip Edilecek Alan</strong>
+      <span class="locked-value">${mediumRisk.label} (${mediumRisk.value}/100)</span>
+    </div>
+
+    <div class="locked-item">
+      <strong>🟢 Güçlü Alan</strong>
+      <span class="locked-value">${strongArea.label} (${strongArea.value}/100)</span>
+    </div>
+  </div>
+`;
   document.getElementById("metrics").innerHTML=`
     <div class="metric">
       <div class="metric-name">Yoğunluk: ${result.density_score ?? "-"} / 100</div>
