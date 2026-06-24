@@ -295,57 +295,7 @@ if (result.photo_quality === "poor") {
     75
   );
 }
-      result.analysis_version = "2.0";
-    
-
-const density = Number(result.density_score || 60);
-const moisture = Number(result.moisture_balance_score || 60);
-const oil = Number(result.oil_balance_score || 60);
-const flakingScore = Number(result.flaking_score || 60);
-const sensitivity = Number(result.sensitivity_redness_score || 60);
-const routineScore = Number(result.routine_score || 60);
-
-const averageScore =
-  density * 0.30 +
-  moisture * 0.15 +
-  oil * 0.10 +
-  flakingScore * 0.10 +
-  sensitivity * 0.15 +
-  routineScore * 0.20;
-
-result.scalp_score = Math.round(averageScore);
-
-let ageAdjustment = 0;
-
-if (averageScore >= 85) {
-  ageAdjustment = -5;
-} else if (averageScore >= 75) {
-  ageAdjustment = -3;
-} else if (averageScore >= 65) {
-  ageAdjustment = 0;
-} else if (averageScore >= 55) {
-  ageAdjustment = 3;
-} else if (averageScore >= 45) {
-  ageAdjustment = 6;
-} else {
-  ageAdjustment = 10;
-}
-
-result.hair_age = Math.max(18, realAge + ageAdjustment);
-
-if (result.scalp_score < 50) {
-  result.score_category = "Yoğun Bakım İhtiyacı";
-}
-else if (result.scalp_score < 70) {
-  result.score_category = "Orta Düzey Bakım İhtiyacı";
-}
-else if (result.scalp_score < 85) {
-  result.score_category = "İyi Düzey";
-}
-else {
-  result.score_category = "Çok İyi Düzey";
-}
-
+   
       lastAnalysisResult = result;
       lastUserInfo = {
         age,
