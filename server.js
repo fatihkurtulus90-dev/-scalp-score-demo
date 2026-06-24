@@ -296,7 +296,7 @@ if (result.photo_quality === "poor") {
   );
 }
       result.analysis_version = "2.0";
-      const realAge = Number(age);
+    
 
 const density = Number(result.density_score || 60);
 const moisture = Number(result.moisture_balance_score || 60);
