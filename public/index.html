@@ -405,6 +405,28 @@ ul{
   line-height:1.7;
 }
 
+.care-plan-card{
+  background:var(--soft);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:20px;
+  margin-top:16px;
+}
+
+.care-plan-week{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:14px;
+  margin-top:10px;
+}
+
+.care-plan-week strong{
+  display:block;
+  margin-bottom:5px;
+  color:var(--text);
+}
+
 @media(max-width:600px){
   body{padding:14px;}
   .grid,
@@ -668,7 +690,8 @@ ul{
         <p id="summary"></p>
         <p style="font-size:12px;color:#777;" id="note"></p>
       </div>
-      <button onclick="window.open('/care-plan.html','_blank')">30 Günlük Bakım Planımı Gör</button>
+      <button id="carePlanBtn" type="button">30 Günlük Bakım Planımı Gör</button>
+      <div id="carePlanBox"></div>
       <button onclick="window.open('/download-pdf','_blank')">PDF Raporunu İndir</button>
       <button id="whatsappBtn" class="whatsapp-button">Analizimi Uzmanla Değerlendir</button>
 
@@ -886,6 +909,11 @@ function renderFullResults(result,focusAreas){
     </div>
 
     <div class="metric">
+      <div class="metric-name">Saç Derisi Dengesi: ${result.scalp_balance_score ?? "-"} / 100</div>
+      <div class="metric-bar"><div class="metric-fill" style="width:${result.scalp_balance_score ?? 0}%"></div></div>
+    </div>
+
+    <div class="metric">
       <div class="metric-name">Nem Dengesi: ${result.moisture_balance_score ?? "-"} / 100</div>
       <div class="metric-bar"><div class="metric-fill" style="width:${result.moisture_balance_score ?? 0}%"></div></div>
     </div>
@@ -949,6 +977,60 @@ Sonucumu uzmanla değerlendirmek istiyorum.
     window.open(url,"_blank");
   };
 }
+document.getElementById("carePlanBtn").onclick = async () => {
+  const carePlanBox = document.getElementById("carePlanBox");
+
+  if (carePlanBox.innerHTML.trim() !== "") {
+    carePlanBox.innerHTML = "";
+    return;
+  }
+
+  try {
+    const response = await fetch("/care-plan");
+    const plan = await response.json();
+
+    if (plan.error) {
+      alert(plan.error);
+      return;
+    }
+
+    carePlanBox.innerHTML = `
+      <div class="care-plan-card">
+        <h3>${plan.title || "30 Günlük Bakım Planı"}</h3>
+
+        <div class="care-plan-week">
+          <strong>Hafta 1</strong>
+          <span>${plan.week1 || ""}</span>
+        </div>
+
+        <div class="care-plan-week">
+          <strong>Hafta 2</strong>
+          <span>${plan.week2 || ""}</span>
+        </div>
+
+        <div class="care-plan-week">
+          <strong>Hafta 3</strong>
+          <span>${plan.week3 || ""}</span>
+        </div>
+
+        <div class="care-plan-week">
+          <strong>Hafta 4</strong>
+          <span>${plan.week4 || ""}</span>
+        </div>
+
+        <p style="font-size:13px;color:#777;margin-top:16px;">
+          ${plan.recommendation || ""}
+        </p>
+      </div>
+    `;
+
+    carePlanBox.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  } catch (err) {
+    alert("Bakım planı yüklenirken hata oluştu.");
+    console.error(err);
+  }
+};
 </script>
 
 </body>
